@@ -205,7 +205,7 @@ if all(k in st.session_state for k in ["qrs", "rr", "rate", "p_wave", "pr", "pqr
     st.markdown("## 🩺 판독 결과")
     st.success(result)
 
-if :
+
     reset()
     st.rerun()
 
@@ -269,7 +269,7 @@ if all(k in st.session_state for k in ["qrs", "rr", "rate", "p_wave", "pr", "pqr
     st.markdown("## 🩺 판독 결과")
     st.success(result)
 
-if :
+
     reset()
     st.rerun()
 
