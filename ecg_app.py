@@ -49,7 +49,7 @@ if "rate" not in st.session_state:
 # P파 선택
 if "p_wave" not in st.session_state:
     st.markdown("### 4️⃣ P파는? 🅿️")
-    if st.session_state.qrs in ["얇은 흔들림", "파형 없음"]:
+    if "qrs" in st.session_state and st.session_state.qrs in ["얇은 흔들림", "파형 없음"]:  # ✅ 안전
         p_options = ["⛔ 파형 없음"]
     else:
         p_options = ["🟢 있음", "❌ 없음", "🪞 T파에 가림", "🎭 모양 다름", "⏩ 빨리 뛰는 곳만 없음"]
