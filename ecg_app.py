@@ -207,7 +207,7 @@ if all(k in st.session_state for k in ["qrs", "rr", "rate", "p_wave", "pr", "pqr
 
 
     reset()
-    st.rerun()
+    
 
 # 진단 결과 출력 및 리셋 버튼
 def diagnose(qrs, rr, rate, p_wave, pr, pqrs):
@@ -271,9 +271,15 @@ if all(k in st.session_state for k in ["qrs", "rr", "rate", "p_wave", "pr", "pqr
 
 
     reset()
-    st.rerun()
+    
 
 # 🔁 리셋 버튼 (중복 제거 후 딱 한 군데에만 위치)
-if st.button("🔁 처음부터 다시", key="reset_button_unique_final"):
-    reset()
-    st.rerun()
+# 🔁 결과 확인 후 직접 선택해서 초기화
+st.markdown("## 🔄 계속하시겠습니까?")
+col_a, col_b = st.columns(2)
+with col_a:
+    if st.button("🔁 처음부터 다시", key="reset_button_final_confirmed"):
+        reset()
+        st.rerun()
+with col_b:
+    st.info("앱을 그대로 유지하고 싶다면 아무것도 누르지 마세요.")
