@@ -205,7 +205,7 @@ if all(k in st.session_state for k in ["qrs", "rr", "rate", "p_wave", "pr", "pqr
     st.markdown("## 🩺 판독 결과")
     st.success(result)
 
-if st.button("🔁 처음부터 다시", key="reset_button"):
+if :
     reset()
     st.rerun()
 
@@ -269,6 +269,11 @@ if all(k in st.session_state for k in ["qrs", "rr", "rate", "p_wave", "pr", "pqr
     st.markdown("## 🩺 판독 결과")
     st.success(result)
 
-if st.button("🔁 처음부터 다시", key="reset_button"):
+if :
+    reset()
+    st.rerun()
+
+# 🔁 리셋 버튼 (중복 제거 후 딱 한 군데에만 위치)
+if st.button("🔁 처음부터 다시", key="reset_button_unique_final"):
     reset()
     st.rerun()
