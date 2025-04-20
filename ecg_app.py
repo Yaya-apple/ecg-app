@@ -208,3 +208,67 @@ if all(k in st.session_state for k in ["qrs", "rr", "rate", "p_wave", "pr", "pqr
 if st.button("🔁 처음부터 다시"):
     reset()
     st.rerun()
+
+# 진단 결과 출력 및 리셋 버튼
+def diagnose(qrs, rr, rate, p_wave, pr, pqrs):
+    rules = {
+        ("정상", "규칙", "서맥", "있음", "정상", "1:1"): "동서맥 (SB, Sinus Bradycardia)",
+        ("정상", "규칙", "정상", "있음", "정상", "1:1"): "정상동성리듬 (NSR, Normal Sinus Rhythm)",
+        ("정상", "규칙", "빈맥", "있음", None, None): "동성빈맥 (ST, Sinus Tachycardia)",
+        ("정상", "규칙", "발작성빈맥(150 이상)", "T파에 가림", None, None): "발작성심실상성빈맥 (PSVT)",
+        ("정상", "불규칙", "정상", "있음", "정상", "1:1"): "동성부정맥 (SA, Sinus Arrhythmia)",
+        ("정상", "불규칙", "서맥", "모양 다름", "5칸 이상", "1:1"): "다소성심방서맥 (WAP)",
+        ("정상", "불규칙", "빈맥", "모양 다름", None, None): "다소성심방빈맥 (MAT)",
+        ("정상", "규칙적이며 불규칙", None, "있음", None, "2:1~3:1"): "심방조동 (AFL)",
+        ("정상", "불규칙", None, "없음", None, None): "심방세동 (AF)",
+        ("정상", None, None, None, "5칸 이상", "1:1"): "1도 방실차단 (1°AVB)",
+        ("정상", None, None, None, "점점 길어짐", "하나 빠짐"): "2도 1형 방실차단 (Mobitz I)",
+        ("정상", None, None, None, "정상", "2:1~3:1"): "2도 2형 방실차단 (Mobitz II)",
+        ("정상", None, None, None, "불규칙", "무관"): "3도 방실차단 (3°AVB)",
+        ("하나만 넓음", "하나만 빠름", None, "있음", None, None): "심실조기수축 (PVC)",
+        ("정상", "하나만 빠름", None, "빨리 뛰는 곳만 없음", None, None): "결정성 조기수축 (PAC)",
+        ("넓음", "규칙", "빈맥", "없음", None, None): "단형심실빈맥 (VT)",
+        ("넓음", "규칙", "발작성빈맥(150 이상)", "없음", None, None): "단형심실빈맥 (VT)",
+        ("넓음", "규칙", "정상", None, None, None): "가속성심실고유리듬 (AIVR)",
+        ("넓음", "규칙", "서맥", None, None, None): "심실고유리듬 (IVR)",
+        ("염전형", "이중나선", None, None, None, None): "염전성심실빈맥 (TdP)",
+        ("얇은 흔들림", "파형 없음", None, None, None, None): "심실세동 (VF)",
+        ("파형 없음", None, None, None, None, None): "무수축 (Asystole)"
+    }
+
+    # 규칙 탐색
+    for key, diagnosis in rules.items():
+        match = True
+        for i, val in enumerate(key):
+            if val is not None:
+                if (i == 0 and qrs != val) or                    (i == 1 and rr != val) or                    (i == 2 and rate != val) or                    (i == 3 and p_wave != val) or                    (i == 4 and pr != val) or                    (i == 5 and pqrs != val):
+                    match = False
+                    break
+        if match:
+            return diagnosis
+
+    return "🩺 새로운 형태의 리듬입니다. 추가 분석이 필요합니다."
+
+# 결과 출력
+if all(k in st.session_state for k in ["qrs", "rr", "rate", "p_wave", "pr", "pqrs"]):
+    st.markdown("## 🧾 입력 요약")
+    for label, key in [
+        ("QRS 폭", "qrs"), ("RR 간격", "rr"), ("맥박", "rate"),
+        ("P파", "p_wave"), ("PR 간격", "pr"), ("P:QRS 비율", "pqrs")
+    ]:
+        st.markdown(f"✅ **{label}**: {st.session_state[key]}")
+
+    result = diagnose(
+        st.session_state.qrs,
+        st.session_state.rr,
+        st.session_state.rate,
+        st.session_state.p_wave,
+        st.session_state.pr,
+        st.session_state.pqrs
+    )
+    st.markdown("## 🩺 판독 결과")
+    st.success(result)
+
+if st.button("🔁 처음부터 다시"):
+    reset()
+    st.rerun()
