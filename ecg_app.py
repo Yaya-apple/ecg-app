@@ -12,23 +12,23 @@ if "qrs" not in st.session_state:
     st.markdown("### 1️⃣ QRS 폭은? ❤️")
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("✅ 정상"):
+        if st.button("✅ 정상", key="qrs_normal"):
             st.session_state.qrs = "정상"
             st.stop()
-        if st.button("⚡ 하나만 넓음"):
+        if st.button("⚡ 하나만 넓음", key="qrs_one_wide"):
             st.session_state.qrs = "하나만 넓음"
             st.stop()
-        if st.button("🌀 염전형"):
+        if st.button("🌀 염전형", key="qrs_torsade"):
             st.session_state.qrs = "염전형"
             st.stop()
     with col2:
-        if st.button("🚨 넓음"):
+        if st.button("🚨 넓음", key="qrs_wide"):
             st.session_state.qrs = "넓음"
             st.stop()
-        if st.button("🌊 얇은 흔들림"):
+        if st.button("🌊 얇은 흔들림", key="qrs_fine"):
             st.session_state.qrs = "얇은 흔들림"
             st.stop()
-        if st.button("⛔ 파형 없음"):
+        if st.button("⛔ 파형 없음", key="qrs_none"):
             st.session_state.qrs = "파형 없음"
             st.stop()
 
