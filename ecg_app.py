@@ -5,104 +5,76 @@ st.title("🫀 단계별 ECG 리듬 알고리즘 (스마트 설문형)")
 
 # 리셋 함수
 def reset():
-    for key in st.session_state.keys():
+    for key in list(st.session_state.keys()):
         del st.session_state[key]
 
-# 1. QRS 폭
-if "qrs" not in st.session_state:
-    st.markdown("### 1️⃣ QRS 폭은? ❤️")
-    if st.button("✅ 정상"):
-        st.session_state.qrs = "정상"
-    elif st.button("🚨 넓음"):
-        st.session_state.qrs = "넓음"
-    elif st.button("⚡ 하나만 넓음"):
-        st.session_state.qrs = "하나만 넓음"
-    elif st.button("🌊 얇은 흔들림"):
-        st.session_state.qrs = "얇은 흔들림"
-    elif st.button("🌀 염전형"):
-        st.session_state.qrs = "염전형"
-    elif st.button("⛔ 파형 없음"):
-        st.session_state.qrs = "파형 없음"
-    st.stop()
-
-# 2. RR 간격
-if "rr" not in st.session_state:
-    qrs = st.session_state.qrs
-    st.markdown("### 2️⃣ RR 간격은? 🪢")
-    rr_options = []
-
-    if qrs in ["얇은 흔들림", "파형 없음"]:
-        rr_options = ["⛔ 파형 없음"]
-    elif qrs == "넓음":
-        rr_options = ["📏 규칙", "🌀 이중나선"]
+# 진단 알고리즘
+def diagnose(qrs, rr, rate, p_wave, pr, pqrs):
+    if qrs == "정상" and rr == "규칙" and rate == "서맥" and p_wave == "있음" and pr == "정상" and pqrs == "1:1":
+        return "동서맥 (SB, Sinus Bradycardia)"
+    elif qrs == "정상" and rr == "규칙" and rate == "정상" and p_wave == "있음" and pr == "정상" and pqrs == "1:1":
+        return "정상동성리듬 (NSR, Normal Sinus Rhythm)"
+    elif qrs == "정상" and rr == "규칙" and rate == "빈맥" and p_wave == "있음":
+        return "동성빈맥 (ST, Sinus Tachycardia)"
+    elif qrs == "정상" and rr == "규칙" and rate == "발작성빈맥(150 이상)" and p_wave == "T파에 가림":
+        return "발작성심실상성빈맥 (PSVT, Paroxysmal SVT)"
+    elif qrs == "정상" and rr == "불규칙" and rate == "정상" and p_wave == "있음" and pr == "정상" and pqrs == "1:1":
+        return "동성부정맥 (SA, Sinus Arrhythmia)"
+    elif qrs == "정상" and rr == "불규칙" and rate == "서맥" and p_wave == "모양 다름" and pr == "5칸 이상" and pqrs == "1:1":
+        return "다소성심방서맥 (WAP, Wandering Atrial Pacemaker)"
+    elif qrs == "정상" and rr == "불규칙" and rate == "빈맥" and p_wave == "모양 다름":
+        return "다소성심방빈맥 (MAT, Multifocal Atrial Tachycardia)"
+    elif qrs == "정상" and rr == "규칙적이며 불규칙" and p_wave == "있음" and pqrs == "2:1~3:1":
+        return "심방조동 (AFL, Atrial Flutter)"
+    elif qrs == "정상" and rr == "불규칙" and p_wave == "없음":
+        return "심방세동 (AF, Atrial Fibrillation)"
+    elif qrs == "정상" and pr == "5칸 이상" and pqrs == "1:1":
+        return "1도 방실차단 (1°AVB, First-degree AV Block)"
+    elif qrs == "정상" and pr == "점점 길어짐" and pqrs == "하나 빠짐":
+        return "2도 1형 방실차단 (Mobitz I)"
+    elif qrs == "정상" and pr == "정상" and pqrs == "2:1~3:1":
+        return "2도 2형 방실차단 (Mobitz II)"
+    elif qrs == "정상" and pr == "불규칙" and pqrs == "무관":
+        return "3도 방실차단 (3°AVB, Complete AV Block)"
+    elif qrs == "하나만 넓음" and rr == "하나만 빠름" and p_wave == "있음":
+        return "심실조기수축 (PVC, Premature Ventricular Contraction)"
+    elif qrs == "정상" and rr == "하나만 빠름" and p_wave == "빨리 뛰는 곳만 없음":
+        return "결정성 조기수축 (PAC, Premature Atrial Contraction)"
+    elif qrs == "넓음" and rr == "규칙" and (rate == "빈맥" or rate == "발작성빈맥(150 이상)") and p_wave == "없음":
+        return "단형심실빈맥 (VT, Ventricular Tachycardia)"
+    elif qrs == "넓음" and rr == "규칙" and rate == "정상":
+        return "가속성심실고유리듬 (AIVR, Accelerated Idioventricular Rhythm)"
+    elif qrs == "넓음" and rr == "규칙" and rate == "서맥":
+        return "심실고유리듬 (IVR, Idioventricular Rhythm)"
+    elif qrs == "염전형" or rr == "이중나선":
+        return "염전성심실빈맥 (TdP, Torsades de Pointes)"
+    elif qrs == "얇은 흔들림" and rr == "파형 없음":
+        return "심실세동 (VF, Ventricular Fibrillation)"
+    elif qrs == "파형 없음":
+        return "무수축 (Asystole)"
     else:
-        rr_options = ["📏 규칙", "📉 불규칙", "📈 규칙적이며 불규칙", "⏩ 하나만 빠름"]
+        return "❓ 정확한 리듬을 판독할 수 없습니다."
 
-    for option in rr_options:
-        if st.button(option):
-            st.session_state.rr = option.split(" ")[1]
-            st.stop()
-
-# 3. 맥박
-if "rate" not in st.session_state:
-    qrs, rr = st.session_state.qrs, st.session_state.rr
-    st.markdown("### 3️⃣ 맥박은? 💓")
-    if qrs in ["얇은 흔들림", "파형 없음"] or rr == "파형 없음":
-        rate_options = ["⛔ 파형 없음"]
-    else:
-        rate_options = ["🐢 서맥", "🧘 정상", "🏃 빈맥", "🚀 발작성빈맥(150 이상)"]
-    for option in rate_options:
-        if st.button(option):
-            st.session_state.rate = option.split(" ")[1]
-            st.stop()
-
-# 4. P파
-if "p_wave" not in st.session_state:
-    qrs = st.session_state.qrs
-    st.markdown("### 4️⃣ P파는? 🅿️")
-    if qrs in ["얇은 흔들림", "파형 없음"]:
-        p_options = ["⛔ 파형 없음"]
-    else:
-        p_options = ["🟢 있음", "❌ 없음", "🪞 T파에 가림", "🎭 모양 다름", "⏩ 빨리 뛰는 곳만 없음"]
-    for option in p_options:
-        if st.button(option):
-            st.session_state.p_wave = option.split(" ")[1]
-            st.stop()
-
-# 5. PR 간격
-if "pr" not in st.session_state:
-    qrs = st.session_state.qrs
-    st.markdown("### 5️⃣ PR 간격은? ⏱️")
-    if qrs in ["얇은 흔들림", "파형 없음"]:
-        pr_options = ["⛔ 파형 없음"]
-    else:
-        pr_options = ["✅ 정상", "📏 5칸 이상", "📉 점점 길어짐", "📐 일정함", "📊 불규칙"]
-    for option in pr_options:
-        if st.button(option):
-            st.session_state.pr = option.split(" ")[1]
-            st.stop()
-
-# 6. P:QRS 비율
-if "pqrs" not in st.session_state:
-    qrs = st.session_state.qrs
-    st.markdown("### 6️⃣ P:QRS 비율은? 🔀")
-    if qrs in ["얇은 흔들림", "파형 없음"]:
-        pqrs_options = ["⛔ 파형 없음"]
-    else:
-        pqrs_options = ["1️⃣ 1:1", "2️⃣ 2:1~3:1", "❓ 무관", "➖ 하나 빠짐", "🌀 불규칙", "0️⃣ 없음"]
-    for option in pqrs_options:
-        if st.button(option):
-            st.session_state.pqrs = option.split(" ")[1]
-            st.stop()
-
-# 결과
-st.markdown("## 🧾 입력 요약")
-for label, key in [
-    ("QRS 폭", "qrs"), ("RR 간격", "rr"), ("맥박", "rate"),
-    ("P파", "p_wave"), ("PR 간격", "pr"), ("P:QRS 비율", "pqrs")
-]:
-    if key in st.session_state:
+# 결과 표시
+if all(k in st.session_state for k in ["qrs", "rr", "rate", "p_wave", "pr", "pqrs"]):
+    st.markdown("## 🧾 입력 요약")
+    for label, key in [
+        ("QRS 폭", "qrs"), ("RR 간격", "rr"), ("맥박", "rate"),
+        ("P파", "p_wave"), ("PR 간격", "pr"), ("P:QRS 비율", "pqrs")
+    ]:
         st.markdown(f"✅ **{label}**: {st.session_state[key]}")
+
+    # 진단 결과
+    result = diagnose(
+        st.session_state.qrs,
+        st.session_state.rr,
+        st.session_state.rate,
+        st.session_state.p_wave,
+        st.session_state.pr,
+        st.session_state.pqrs
+    )
+    st.markdown("## 🩺 판독 결과")
+    st.success(result)
 
 # 리셋 버튼
 if st.button("🔁 처음부터 다시"):
