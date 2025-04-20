@@ -1,116 +1,67 @@
 import streamlit as st
 
-st.set_page_config(page_title="ECG 리듬 판독기", page_icon="🫀")
-st.title("🫀 ECG 리듬 판독기")
-st.write("아래 질문에 순서대로 답해주세요. 결과는 마지막에 나옵니다.")
+st.set_page_config(page_title="ECG 리듬 판독기", page_icon="💓")
+st.title("💓 ECG 리듬 판독기 (종식님 맞춤 알고리즘)")
 
-# 상태 초기화
-if "step" not in st.session_state:
-    st.session_state.step = 0
-    st.session_state.answers = {}
+# 사용자 입력
+qrs = st.radio("QRS 폭", ["정상", "넓음", "하나만 넓음", "얇은 흔들림", "염전형", "파형 없음"])
+rr = st.radio("RR 간격", ["규칙", "불규칙", "규칙적이며 불규칙", "하나만 빠름", "이중나선", "파형 없음"])
+rate = st.radio("맥박", ["서맥", "정상", "빈맥", "발작성빈맥(150 이상)", "파형 없음"])
+p_wave = st.radio("P파", ["있음", "없음", "T파에 가림", "모양 다름", "빨리 뛰는 곳만 없음", "파형 없음"])
+pr = st.radio("PR 간격", ["정상", "5칸 이상", "점점 길어짐", "일정함", "불규칙", "파형 없음"])
+p_qrs = st.radio("P:QRS 비율", ["1:1", "2:1~3:1", "무관", "하나 빠짐", "불규칙", "없음", "파형 없음"])
 
-def reset():
-    st.session_state.step = 0
-    st.session_state.answers = {}
+# 알고리즘
+def diagnose(qrs, rr, rate, p_wave, pr, p_qrs):
+    if qrs == "정상" and rr == "규칙" and rate == "서맥" and p_wave == "있음" and pr == "정상" and p_qrs == "1:1":
+        return "동서맥 (SB, Sinus Bradycardia)"
+    if qrs == "정상" and rr == "규칙" and rate == "정상" and p_wave == "있음" and pr == "정상" and p_qrs == "1:1":
+        return "정상동성리듬 (NSR, Normal Sinus Rhythm)"
+    if qrs == "정상" and rr == "규칙" and rate == "빈맥" and p_wave == "있음" and pr == "정상" and p_qrs == "1:1":
+        return "동성빈맥 (ST, Sinus Tachycardia)"
+    if qrs == "정상" and rr == "규칙" and rate == "발작성빈맥(150 이상)" and p_wave == "T파에 가림" and pr == "정상" and p_qrs == "1:1":
+        return "발작성심실상성빈맥 (PSVT, Paroxysmal SVT)"
+    if qrs == "정상" and rr == "불규칙" and rate == "정상" and p_wave == "있음" and pr == "정상" and p_qrs == "1:1":
+        return "동성부정맥 (SA, Sinus Arrhythmia)"
+    if qrs == "정상" and rr == "불규칙" and rate == "서맥" and p_wave == "모양 다름" and pr == "5칸 이상" and p_qrs == "1:1":
+        return "다소성심방서맥 (WAP, Wandering Atrial Pacemaker)"
+    if qrs == "정상" and rr == "불규칙" and rate == "빈맥" and p_wave == "모양 다름" and pr == "정상":
+        return "다소성빈맥 (MAT, Multifocal Atrial Tachycardia)"
+    if qrs == "정상" and rr == "규칙적이며 불규칙" and rate == "정상" and p_wave == "있음" and pr == "정상" and p_qrs == "2:1~3:1":
+        return "심방조동 (AFL, Atrial Flutter)"
+    if qrs == "정상" and rr == "불규칙" and rate == "정상" and p_wave == "없음" and pr == "정상":
+        return "심방세동 (AF, Atrial Fibrillation)"
+    if qrs == "정상" and rr == "규칙" and rate == "정상" and p_wave == "있음" and pr == "5칸 이상" and p_qrs == "1:1":
+        return "1도 방실차단 (1°AVB, First-degree AV Block)"
+    if qrs == "정상" and rr == "불규칙" and rate == "정상" and p_wave == "있음" and pr == "점점 길어짐" and p_qrs == "하나 빠짐":
+        return "2도 1형 방실차단 (Mobitz I)"
+    if qrs == "정상" and rr == "규칙" and rate == "서맥" and p_wave == "있음" and pr == "정상" and p_qrs == "불규칙":
+        return "2도 2형 방실차단 (Mobitz II)"
+    if qrs == "규칙적" and rr == "규칙" and rate == "서맥" and p_wave == "있음" and pr == "불규칙" and p_qrs == "무관":
+        return "3도 방실차단 (3°AVB, Complete AV Block)"
+    if qrs == "정상" and rr == "하나만 빠름" and rate == "정상" and p_wave == "빨리 뛰는 곳만 없음" and pr == "정상":
+        return "결정성 조기수축 (PAC, Premature Atrial Contraction)"
+    if qrs == "넓음" and rr == "규칙" and rate == "정상" and p_wave == "정상" and pr == "정상":
+        return "가속성심실고유리듬 (AIVR, Accelerated Idioventricular Rhythm)"
+    if qrs == "정상" and rr == "규칙" and rate == "서맥" and p_wave == "정상" and pr == "정상":
+        return "심실고유리듬 (IVR, Idioventricular Rhythm)"
+    if qrs == "하나만 넓음" and rr == "하나만 빠름" and rate == "정상" and p_wave == "있음":
+        return "심실조기수축 (PVC, Premature Ventricular Contraction)"
+    if qrs == "넓음" and rr == "규칙" and rate == "발작성빈맥(150 이상)" and p_wave == "없음" and pr == "정상":
+        return "단형심실빈맥 (VT, Ventricular Tachycardia)"
+    if qrs == "염전형" and rr == "이중나선" and rate == "파형 없음":
+        return "염전성심실빈맥 (TdP, Torsades de Pointes)"
+    if qrs == "얇은 흔들림" and rr == "파형 없음":
+        return "심실세동 (VF, Ventricular Fibrillation)"
+    if qrs == "파형 없음" and rr == "아주 얇은 파" and rate == "아주 얇은 파":
+        return "무수축 (Asystole)"
+    if qrs == "정상" and rr == "규칙" and rate == "정상" and p_wave == "정상" and pr == "정상" and p_qrs == "1:1":
+        return "정상동성리듬 (NSR, Normal Sinus Rhythm)"
+    return "❓ 해당 조건에 맞는 리듬이 없습니다. 다시 확인해보세요."
 
-# 기본 질문
-questions = [
-    ("QRS 폭이 좁습니까? (≤ 0.12초)", "qrs_narrow"),
-    ("RR 간격이 규칙적입니까?", "rr_regular"),
-]
+# 결과
+if st.button("🩺 결과 보기"):
+    result = diagnose(qrs, rr, rate, p_wave, pr, p_qrs)
+    st.subheader("🔍 판독 결과")
+    st.success(result)
 
-# 조건에 따라 추가 질문
-def extra_questions():
-    qrs = st.session_state.answers.get("qrs_narrow")
-    rr = st.session_state.answers.get("rr_regular")
-
-    if qrs == "예":
-        if rr == "예":
-            return [("톱니 모양이 보입니까?", "sawtooth"),
-                    ("P파가 보입니까?", "p_wave")]
-        else:
-            return [("톱니 모양이 보입니까?", "sawtooth2"),
-                    ("P파가 없고 기저선이 불규칙합니까?", "no_p_wave")]
-    else:
-        if rr == "예":
-            return []
-        else:
-            return [("QRS가 커졌다 작아졌다 꼬여 있습니까? (Torsades 양상)", "torsades")]
-
-# 질문 출력
-def ask_question(text, key):
-    st.subheader(text)
-    col1, col2 = st.columns(2)
-    if col1.button("✅ 예", key=f"{key}_yes"):
-        st.session_state.answers[key] = "예"
-        st.session_state.step += 1
-        st.rerun()
-    if col2.button("❌ 아니오", key=f"{key}_no"):
-        st.session_state.answers[key] = "아니오"
-        st.session_state.step += 1
-        st.rerun()
-
-# 결과 출력
-def show_result():
-    a = st.session_state.answers
-    summary = []
-    emoji = "❓"
-    diagnosis = "결과 없음"
-
-    if a.get("qrs_narrow") == "예":
-        summary.append("QRS 폭이 좁고")
-    else:
-        summary.append("QRS 폭이 넓고")
-
-    if a.get("rr_regular") == "예":
-        summary.append("RR 간격이 규칙적이며")
-    else:
-        summary.append("RR 간격이 불규칙하며")
-
-    if a.get("qrs_narrow") == "예":
-        if a.get("rr_regular") == "예":
-            if a.get("sawtooth") == "예":
-                diagnosis = "심방조동 (Atrial Flutter)"
-                emoji = "🪚"
-            elif a.get("p_wave") == "예":
-                diagnosis = "심방빈맥 (Atrial Tachycardia)"
-                emoji = "💓"
-            else:
-                diagnosis = "PSVT 또는 AVNRT"
-                emoji = "⚡"
-        else:
-            if a.get("sawtooth2") == "예":
-                diagnosis = "심방조동 (전도율 가변)"
-                emoji = "🪚"
-            elif a.get("no_p_wave") == "예":
-                diagnosis = "심방세동 (Atrial Fibrillation)"
-                emoji = "🌀"
-            else:
-                diagnosis = "불규칙 상심실성 리듬"
-                emoji = "🤔"
-    else:
-        if a.get("rr_regular") == "예":
-            diagnosis = "심실빈맥 (Ventricular Tachycardia)"
-            emoji = "🚨"
-        else:
-            if a.get("torsades") == "예":
-                diagnosis = "Torsades de Pointes"
-                emoji = "🌀⚡"
-            else:
-                diagnosis = "심실세동 또는 비정형 VT"
-                emoji = "💀"
-
-    st.success(f"🧾 조건 요약: {' '.join(summary)} → {diagnosis} {emoji}")
-    if st.button("🔁 다시 시작하기"):
-        reset()
-        st.rerun()
-
-# 실행 흐름 제어
-if st.session_state.step < len(questions):
-    qtext, key = questions[st.session_state.step]
-    ask_question(qtext, key)
-elif st.session_state.step < len(questions) + len(extra_questions()):
-    qtext, key = extra_questions()[st.session_state.step - len(questions)]
-    ask_question(qtext, key)
-else:
-    show_result()
