@@ -3,12 +3,11 @@ import streamlit as st
 st.set_page_config(page_title="ECG 설문형 알고리즘", page_icon="🫀")
 st.title("🫀 단계별 ECG 리듬 알고리즘 (스마트 설문형)")
 
-# 리셋 함수
 def reset():
     for key in list(st.session_state.keys()):
         del st.session_state[key]
 
-# 1단계: QRS 폭 선택
+# QRS
 if "qrs" not in st.session_state:
     st.markdown("### 1️⃣ QRS 폭은? ❤️")
     col1, col2 = st.columns(2)
@@ -33,7 +32,7 @@ if "qrs" not in st.session_state:
             st.session_state.qrs = "파형 없음"
             st.stop()
 
-# 2단계: RR 간격
+# RR
 if "qrs" in st.session_state and "rr" not in st.session_state:
     st.markdown("### 2️⃣ RR 간격은? 🪢")
     if st.session_state.qrs in ["얇은 흔들림", "파형 없음"]:
@@ -56,7 +55,7 @@ if "qrs" in st.session_state and "rr" not in st.session_state:
                     st.session_state.rr = label
                     st.stop()
 
-# 3단계: 맥박
+# Rate
 if all(k in st.session_state for k in ["qrs", "rr"]) and "rate" not in st.session_state:
     st.markdown("### 3️⃣ 맥박은? 💓")
     if st.session_state.qrs in ["얇은 흔들림", "파형 없음"] or st.session_state.rr == "파형 없음":
@@ -77,7 +76,7 @@ if all(k in st.session_state for k in ["qrs", "rr"]) and "rate" not in st.sessio
                     st.session_state.rate = label
                     st.stop()
 
-# 4단계: P파, PR 간격, P:QRS 비율
+# P, PR, P:QRS
 if all(k in st.session_state for k in ["qrs", "rr", "rate"]):
 
     if "p_wave" not in st.session_state:
